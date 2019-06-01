@@ -1,1 +1,1 @@
-# lean
+# LEAN - Lexical Entailment Augmented Network
