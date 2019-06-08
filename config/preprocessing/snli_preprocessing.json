@@ -1,0 +1,16 @@
+{
+    "data_dir": "../../data/dataset/snli_1.0",
+    "embeddings_file": "../../data/embeddings/glove.840B.300d.txt",
+    "w2h_file": "../../data/embeddings/word2hyp.txt",
+    "lear_file": "../../data/embeddings/lear.txt",
+    "target_dir": "../../data/preprocessed/SNLI",
+
+    "lowercase": true,
+    "ignore_punctuation": true,
+    "num_words": null,
+    "labeldict": {"entailment": 0,
+                  "neutral": 1,
+                  "contradiction": 2},
+    "bos": null,
+    "eos": null
+}

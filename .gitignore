@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# VSCode
+.vscode
+
+# Data
+data/dataset/snli_1.0
+data/dataset/multinli_1.0
+data/preprocessed
+data/checkpoints
+data/embeddings/
