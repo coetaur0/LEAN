@@ -91,10 +91,8 @@ On MultiNLI, LEAN also outperforms ESIM, by an even larger margin:
 | Split           | Accuracy (%)    |
 |-----------------|-----------------|
 | Train           |     88.3        |
-|-----------------|-----------------|
 | Dev matched     |     77.6        |
 | Dev mismatched  |     77.6        |
-|-----------------|-----------------|
 | Test matched    |     77.7 (+1.1) |
 | Test mismatched |     76.8 (+1.0) |
 
