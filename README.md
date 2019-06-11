@@ -2,6 +2,10 @@
 
 LEAN is a neural network for natural language inference based on the *Enhanced Sequential Inference Model* (ESIM) by Chen et al. and augmented with lexical entailment information.
 
+The figure below illustrates a high-level view of the model's architecture.
+
+![alt-text](./lean.png)
+
 ## How to
 
 ### Install the package
