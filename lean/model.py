@@ -93,7 +93,7 @@ class LEAN1(nn.Module):
 
         self._attention = SoftmaxAttention()
 
-        self._projection = nn.Sequential(nn.Linear(4*2*self.hidden_size+4,
+        self._projection = nn.Sequential(nn.Linear(4*2*self.hidden_size+6,
                                                    self.hidden_size),
                                          nn.ReLU())
 
@@ -103,11 +103,11 @@ class LEAN1(nn.Module):
                                            bidirectional=True)
 
         self._classification = nn.Sequential(nn.Dropout(p=self.dropout),
-                                             nn.Linear(2*4*self.hidden_size+4,
-                                                       self.hidden_size+1),
+                                             nn.Linear(2*4*self.hidden_size+6,
+                                                       self.hidden_size+2),
                                              nn.Tanh(),
                                              nn.Dropout(p=self.dropout),
-                                             nn.Linear(self.hidden_size+1,
+                                             nn.Linear(self.hidden_size+2,
                                                        self.num_classes))
 
         # Initialize all weights and biases in the model.
@@ -180,25 +180,25 @@ class LEAN1(nn.Module):
         
         # Computation of the average, maximum and minimum W2H score for each word
         # in the premise.
-        #premise_w2h_avg = masked_average(w2h_scores, hypotheses_mask)
+        premise_w2h_avg = masked_average(w2h_scores, hypotheses_mask)
         premise_w2h_max = masked_max(w2h_scores, hypotheses_mask)
         premise_w2h_min = masked_min(w2h_scores, hypotheses_mask)
         w2h_scores = w2h_scores.transpose(2, 1).contiguous()
         # Computation of the average, maximum and minimum W2H score for each word
         # in the hypothesis.
-        #hypothesis_w2h_avg = masked_average(w2h_scores, premises_mask)
+        hypothesis_w2h_avg = masked_average(w2h_scores, premises_mask)
         hypothesis_w2h_max = masked_max(w2h_scores, premises_mask)
         hypothesis_w2h_min = masked_min(w2h_scores, premises_mask)
 
         # Computation of the average, maximum and minimum LEAR score for each word
         # in the premise.
-        #premise_lear_avg = masked_average(lear_scores, hypotheses_mask)
+        premise_lear_avg = masked_average(lear_scores, hypotheses_mask)
         premise_lear_max = masked_max(lear_scores, hypotheses_mask)
         premise_lear_min = masked_min(lear_scores, hypotheses_mask)
         lear_scores = lear_scores.transpose(2, 1).contiguous()
         # Computation of the average, maximum and minimum LEAR score for each word
         # in the hypothesis.
-        #hypothesis_lear_avg = masked_average(lear_scores, premises_mask)
+        hypothesis_lear_avg = masked_average(lear_scores, premises_mask)
         hypothesis_lear_max = masked_max(lear_scores, premises_mask)
         hypothesis_lear_min = masked_min(lear_scores, premises_mask)
 
@@ -208,8 +208,10 @@ class LEAN1(nn.Module):
                                        attended_premises,
                                        encoded_premises - attended_premises,
                                        encoded_premises * attended_premises,
+                                       premise_w2h_avg,
                                        premise_w2h_max,
                                        premise_w2h_min,
+                                       premise_lear_avg,
                                        premise_lear_max,
                                        premise_lear_min],
                                       dim=-1)
@@ -220,8 +222,10 @@ class LEAN1(nn.Module):
                                          attended_hypotheses,
                                          encoded_hypotheses *
                                          attended_hypotheses,
+                                         hypothesis_w2h_avg,
                                          hypothesis_w2h_max,
                                          hypothesis_w2h_min,
+                                         hypothesis_lear_avg,
                                          hypothesis_lear_max,
                                          hypothesis_lear_min],
                                         dim=-1)
@@ -248,9 +252,9 @@ class LEAN1(nn.Module):
 
         # Computation of the average, max. and min. W2H score between the premise
         # and hypothesis.
-        #w2h_avg = masked_average(premise_w2h_avg.transpose(2, 1).contiguous(),
-        #                         premises_mask,
-        #                         keepdim=False)
+        w2h_avg = masked_average(premise_w2h_avg.transpose(2, 1).contiguous(),
+                                 premises_mask,
+                                 keepdim=False)
         w2h_max = masked_max(premise_w2h_max.transpose(2, 1).contiguous(),
                              premises_mask,
                              keepdim=False)
@@ -260,9 +264,9 @@ class LEAN1(nn.Module):
         
         # Computation of the average, max. and min. LEAR score between the premise
         # and hypothesis.
-        #lear_avg = masked_average(premise_lear_avg.transpose(2, 1).contiguous(),
-        #                          premises_mask,
-        #                          keepdim=False)
+        lear_avg = masked_average(premise_lear_avg.transpose(2, 1).contiguous(),
+                                  premises_mask,
+                                  keepdim=False)
         lear_max = masked_max(premise_lear_max.transpose(2, 1).contiguous(),
                               premises_mask,
                               keepdim=False)
@@ -273,8 +277,8 @@ class LEAN1(nn.Module):
         # The average, max. and min. LE scores at the sentence pair level are
         # concatenated to the final vector 'v' before classification.
         v = torch.cat([v_a_avg, v_a_max, v_b_avg, v_b_max,
-                       w2h_max, w2h_min,
-                       lear_max, lear_min],
+                       w2h_avg, w2h_max, w2h_min,
+                       lear_avg, lear_max, lear_min],
                       dim=1)
 
         logits = self._classification(v)
